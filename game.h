@@ -3,6 +3,7 @@
 #define GAME_H
 
 #include "tetromino.h"
+#include <time.h>
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
@@ -15,6 +16,23 @@ private:
   // 게임 판을 나타내는 배열
   // board[x][y]가 true 인 경우 x, y 위치에 고정된 블록이 존재하는 것을 의미한다
   bool board_[BOARD_WIDTH][BOARD_HEIGHT];
+
+  // line 설정할 변수.
+  int inputLines_;
+
+  // 도형 위치
+  int x_, y_;
+
+  // 타이머를 위한 변수.
+  clock_t start_;
+
+  Tetromino* cur;
+  Tetromino* next;
+  Tetromino* hold;
+
+  Tetromino* randomTetromino();
+  std::string stringTime(clock_t start);
+
 
 public:
   // 게임의 한 프레임을 처리한다.
