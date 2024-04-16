@@ -33,6 +33,7 @@ Tetromino::Tetromino(std::string name, int size, std::string shape)
             else shape_[i][j] = false;
         }
     }
+    original_ = this;
 }
 
 Tetromino Tetromino::I("I", 4, "XXXXOOOOXXXXXXXX");

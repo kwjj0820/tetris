@@ -1,7 +1,6 @@
 #include "game.h"
 #include "console/console.h"
 #include <iostream>
-#include "tetromino.h"
 
 // 게임의 한 프레임을 처리한다.
 void Game::update()
@@ -64,6 +63,16 @@ void Game::handleInput()
     if (key(console::K_LEFT)) x_--;
     if (key(console::K_RIGHT)) x_++;
     if (key(console::K_DOWN)) y_++;
+    if (key(console::K_X))
+    {
+        Tetromino cw = cur->rotatedCW();
+        cur = &cw;
+    }
+    if (key(console::K_Z))
+    {
+        Tetromino ccw = cur->rotatedCCW();
+        cur = &ccw;
+    }
 }
 
 Tetromino* Game::randomTetromino()
@@ -130,6 +139,7 @@ Game::Game()
     std::cin >> inputLines_;
     start_ = clock();
     next = randomTetromino();
+    cur = next;
     x_ = 5;
     y_ = 1;
     timer = 0;
