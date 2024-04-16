@@ -26,13 +26,19 @@ private:
   // 타이머를 위한 변수.
   clock_t start_;
 
+  // 프레임 조절을 위한 변수.
+  int timer;
+
   Tetromino* cur;
   Tetromino* next;
   Tetromino* hold;
 
   Tetromino* randomTetromino();
   std::string stringTime(clock_t start);
-
+  void checkTetrominoCollision();
+  void handleInput();
+  void whenCollision();
+  void restrictInScreen();
 
 public:
   // 게임의 한 프레임을 처리한다.

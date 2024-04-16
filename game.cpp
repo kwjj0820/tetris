@@ -6,17 +6,64 @@
 // 게임의 한 프레임을 처리한다.
 void Game::update()
 {
-
+    checkTetrominoCollision();
+    handleInput();
+    cur = next;
+    timer++;
+    if(timer >= DROP_DELAY)
+    {
+        y_++;
+        timer = 0;
+    }
 }
 
-Game::Game()
+void Game::checkTetrominoCollision()
 {
-    std::cout << "Input Lines: ";
-    std::cin >> inputLines_;
-    start_ = clock();
-    next = randomTetromino();
-    x_ = BOARD_HEIGHT / 2;
+    int tempX = x_;
+    int tempY = y_;
+    for(int i = tempX; i < tempX + cur->size(); i++)
+    {
+        for(int j = tempY; j < tempY + cur->size(); j++)
+        {
+            if(cur->check(i, j))
+            {
+                if(i < 1)
+                {
+                    x_++;
+                }
+                else if(i >= BOARD_WIDTH)
+                {
+                    x_--;
+                }
+                else if(j >= BOARD_HEIGHT || board_[i][j])
+                {
+                    //whenCollision();
+                }
+            }
+        }
+    }
+}
+
+void Game::whenCollision()
+{
+    for(int i = x_; i < x_ + cur->size(); i++)
+    {
+        for(int j = y_; j < y_ + cur->size(); j++)
+        {
+            board_[i][j] = true;
+        }
+    }
+    x_ = 5;
     y_ = 1;
+    cur = next;
+    next = randomTetromino();
+}
+
+void Game::handleInput()
+{
+    if (key(console::K_LEFT)) x_--;
+    if (key(console::K_RIGHT)) x_++;
+    if (key(console::K_DOWN)) y_++;
 }
 
 Tetromino* Game::randomTetromino()
@@ -75,4 +122,17 @@ void Game::draw()
 bool Game::shouldExit()
 {
 
+}
+
+Game::Game()
+{
+    std::cout << "Input Lines: ";
+    std::cin >> inputLines_;
+    start_ = clock();
+    next = randomTetromino();
+    x_ = 5;
+    y_ = 1;
+    timer = 0;
+    for(int i = 0; i < BOARD_WIDTH; i++)
+        for(int j = 0; j < BOARD_HEIGHT; j++) board_[i][j] = false;
 }

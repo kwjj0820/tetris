@@ -25,15 +25,14 @@ Tetromino::Tetromino(std::string name, int size, std::string shape)
     name_ = name;
     size_ = size;
     int idx = 0;
-    for(int i = 0; i < MAX_SIZE; i++)
+    for(int i = 0; i < size_; i++)
     {
-        for(int j = 0; j < MAX_SIZE; j++)
+        for(int j = 0; j < size_; j++)
         {
             if(shape[idx++] == 'O') shape_[i][j] = true;
             else shape_[i][j] = false;
         }
     }
-    original_ = this;
 }
 
 Tetromino Tetromino::I("I", 4, "XXXXOOOOXXXXXXXX");
@@ -49,7 +48,7 @@ Tetromino Tetromino::rotatedCW()
 {
     // 변형되는 인덱스 값
     std::string temp;
-    for(int i = 0; i < MAX_SIZE; i++)
+    for(int i = 0; i < MAX_SIZE - 1; i++)
     {
         for(int j = MAX_SIZE - 1; j >= 0; j--)
         {
@@ -76,24 +75,14 @@ Tetromino Tetromino::rotatedCCW()
     return result;
 }
 
-// 화면의 x, y 위치에 s 문자열로  테트로미노를 그린다
+// 화면의 x, y 위치에 s 문자열로 테트로미노를 그린다
 void Tetromino::drawAt(std::string s, int x, int y)
 {
-    int idx_X = x;
-    int idx_Y = y;
     for(int i = 0; i < size(); i++)
     {
         for(int j = 0; j < size(); j++)
         {
-            if(check(i, j))
-            {
-                console::draw(idx_X++, idx_Y, BLOCK_STRING);
-                if(x == MAX_SIZE)
-                {
-                    idx_X = x;
-                    idx_Y++;
-                }
-            }
+            if(shape_[i][j]) console::draw(j + x, i + y, BLOCK_STRING);
         }
     }
 }
