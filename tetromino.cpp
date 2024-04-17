@@ -49,11 +49,12 @@ Tetromino Tetromino::rotatedCW()
 {
     // 변형되는 인덱스 값
     std::string temp;
-    for(int i = 0; i < MAX_SIZE - 1; i++)
+    for(int i = 0; i < MAX_SIZE; i++)
     {
         for(int j = MAX_SIZE - 1; j >= 0; j--)
         {
             if(shape_[j][i]) temp += "O";
+            else temp += "X";
         }
     }
     Tetromino result = Tetromino(name(), size(), temp);

@@ -6,6 +6,7 @@
 void Game::update()
 {
     handleInput();
+    checkTetrominoCollision();
     timer++;
     if(timer >= DROP_DELAY)
     {
@@ -47,7 +48,7 @@ void Game::whenCollision()
     {
         for(int j = y_; j < y_ + cur->size(); j++)
         {
-            board_[i][j] = true;
+            if(cur->check(i, j)) board_[i][j] = true;
         }
     }
     x_ = 5;
@@ -63,15 +64,16 @@ void Game::handleInput()
     if (key(console::K_DOWN)) y_++;
     if (key(console::K_X))
     {
-        Tetromino cw = cur->rotatedCW();
-        cur = &cw;
+        Tetromino* newCur = new Tetromino(cur->rotatedCW());
+        delete cur;
+        cur = newCur;
     }
     if (key(console::K_Z))
     {
-        Tetromino ccw = cur->rotatedCCW();
-        cur = &ccw;
+        Tetromino* newCur = new Tetromino(cur->rotatedCCW());
+        delete cur;
+        cur = newCur;
     }
-    checkTetrominoCollision();
 }
 
 Tetromino* Game::randomTetromino()
@@ -123,6 +125,13 @@ void Game::draw()
     console::draw(19, 0, "Hold");
     console::draw(0, 22, std::to_string(inputLines_) + " lines left");
     console::draw(2, 23, stringTime(start_));
+    for(int i = 0; i < BOARD_WIDTH; i++)
+    {
+        for(int j = 0; j < BOARD_HEIGHT; j++)
+        {
+            if(board_[i][j]) console::draw(i, j, BLOCK_STRING);
+        }
+    }
     cur->drawAt(cur->name(), x_, y_);
 }
 
