@@ -5,9 +5,7 @@
 // 게임의 한 프레임을 처리한다.
 void Game::update()
 {
-    checkTetrominoCollision();
     handleInput();
-    cur = next;
     timer++;
     if(timer >= DROP_DELAY)
     {
@@ -28,15 +26,15 @@ void Game::checkTetrominoCollision()
             {
                 if(i < 1)
                 {
-                    x_++;
+                    x_ = i + 1;
                 }
                 else if(i >= BOARD_WIDTH)
                 {
-                    x_--;
+                    x_ -= i - BOARD_WIDTH;
                 }
                 else if(j >= BOARD_HEIGHT || board_[i][j])
                 {
-                    //whenCollision();
+                    whenCollision();
                 }
             }
         }
@@ -73,6 +71,7 @@ void Game::handleInput()
         Tetromino ccw = cur->rotatedCCW();
         cur = &ccw;
     }
+    checkTetrominoCollision();
 }
 
 Tetromino* Game::randomTetromino()
@@ -140,6 +139,7 @@ Game::Game()
     start_ = clock();
     next = randomTetromino();
     cur = next;
+    hold = nullptr;
     x_ = 5;
     y_ = 1;
     timer = 0;
