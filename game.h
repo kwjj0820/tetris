@@ -20,7 +20,7 @@ private:
   // line 설정할 변수.
   int inputLines_;
 
-  // 도형 위치
+  // 도형 좌측 상단 위치
   int x_, y_;
 
   // 타이머를 위한 변수.
@@ -35,10 +35,8 @@ private:
 
   Tetromino* randomTetromino();
   std::string stringTime(clock_t start);
-  void checkTetrominoCollision();
   void handleInput();
   void whenCollision();
-  void restrictInScreen();
 
 public:
   // 게임의 한 프레임을 처리한다.
