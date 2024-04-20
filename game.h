@@ -29,14 +29,22 @@ private:
   // 프레임 조절을 위한 변수.
   int timer;
 
+  int hold_cnt;
+
+  bool isGameover;
+
   Tetromino* cur;
   Tetromino* next;
   Tetromino* hold;
+  Tetromino* original_;
 
   Tetromino* randomTetromino();
   std::string stringTime(clock_t start);
   void handleInput();
-  void whenCollision();
+  void whenLand();
+  void isCollision();
+  void isLineFull();
+  void setupNew();
 
 public:
   // 게임의 한 프레임을 처리한다.

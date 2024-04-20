@@ -29,8 +29,8 @@ Tetromino::Tetromino(std::string name, int size, std::string shape)
     {
         for(int j = 0; j < size_; j++)
         {
-            if(shape[idx++] == 'O') shape_[i][j] = true;
-            else shape_[i][j] = false;
+            if(shape[idx++] == 'O') shape_[j][i] = true;
+            else shape_[j][i] = false;
         }
     }
     original_ = this;
@@ -49,32 +49,34 @@ Tetromino Tetromino::rotatedCW()
 {
     // 변형되는 인덱스 값
     std::string temp;
-    for(int i = 0; i < MAX_SIZE; i++)
+    for(int i = 0; i < size(); i++)
     {
-        for(int j = MAX_SIZE - 1; j >= 0; j--)
+        for(int j = size() - 1; j >= 0; j--)
         {
-            if(shape_[j][i]) temp += "O";
+            if(shape_[i][j]) temp += "O";
             else temp += "X";
         }
     }
-    Tetromino result = Tetromino(name(), size(), temp);
-    return result;
+    Tetromino rotate = Tetromino(name(), size(), temp);
+    rotate.original_ = this->original_;
+    return rotate;
 }
 
 // 반시계 방향으로 회전한 모습의 테트로미노 객체를 반환한다.
 Tetromino Tetromino::rotatedCCW()
 {
     std::string temp;
-    for(int i = MAX_SIZE - 1; i >= 0; i--)
+    for(int i = size() - 1; i >= 0; i--)
     {
-        for(int j = 0; j < MAX_SIZE; j++)
+        for(int j = 0; j < size(); j++)
         {
-            if(shape_[j][i]) temp += "O";
+            if(shape_[i][j]) temp += "O";
             else temp += "X";
         }
     }
-    Tetromino result = Tetromino(name_, size_, temp);
-    return result;
+    Tetromino rotate = Tetromino(name(), size(), temp);
+    rotate.original_ = this->original_;
+    return rotate;
 }
 
 // 화면의 x, y 위치에 s 문자열로 테트로미노를 그린다
@@ -84,7 +86,7 @@ void Tetromino::drawAt(std::string s, int x, int y)
     {
         for(int j = 0; j < size(); j++)
         {
-            if(shape_[i][j]) console::draw(j + x, i + y, BLOCK_STRING);
+            if(shape_[i][j]) console::draw(i + x, j + y, BLOCK_STRING);
         }
     }
 }

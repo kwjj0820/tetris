@@ -6,77 +6,264 @@
 void Game::update()
 {
     handleInput();
-<<<<<<< HEAD
-    checkTetrominoCollision();
-=======
-    whenCollision();
->>>>>>> 25e27a285c39eb1481f4133ebbfaba851197742b
     timer++;
     if(timer >= DROP_DELAY)
     {
-        y_++;
+        bool canDown = true;
+        for(int i = 0; i < cur->size(); i++)
+        {
+            for(int j = 0; j < cur->size(); j++)
+            {
+                if(cur->check(i, j))
+                {
+                    if(y_ + j >= BOARD_HEIGHT)
+                    {
+                        canDown = false;
+                        break;
+                    }
+                    else if(board_[x_ + i - 1][y_ + j]) isCollision();
+                }
+            }
+        }
+        if(canDown) y_++;
+        else whenLand();
         timer = 0;
+    }
+    isLineFull();
+}
+
+void Game::setupNew()
+{
+    cur = next;
+    next = randomTetromino();
+    original_ = cur->original();
+    x_ = 5;
+    y_ = 1;
+    for(int i = 0; i < cur->size(); i++)
+    {
+        for(int j = 0; j < cur->size(); j++)
+        {
+            if(cur->check(i, j) && board_[x_ + i - 1][y_ + j - 1])
+            {
+                isGameover = true;
+            }
+        }
     }
 }
 
-void Game::whenCollision()
+void Game::isLineFull()
 {
-    if(y_ == BOARD_HEIGHT - 1 || board_[x_][y_])
+    int cnt = 0;
+    for(int i = 0; i < BOARD_HEIGHT; i++)
     {
-        for(int i = 0; i < cur->size(); i++)
+        cnt = 0;
+        for(int j = 0; j < BOARD_WIDTH; j++)
         {
-<<<<<<< HEAD
-            if(cur->check(i, j)) board_[i][j] = true;
-=======
-            for(int j = 0; j < cur->size(); j++)
-            {
-                if(cur->check(x_ + i, y_ + j)) board_[x_ + i][y_ + j] = true;
-            }
->>>>>>> 25e27a285c39eb1481f4133ebbfaba851197742b
+            if(board_[j][i]) cnt++;
         }
-        x_ = 5;
-        y_ = 1;
-        cur = next;
-        next = randomTetromino();
+        if(cnt == 10)
+        {
+            inputLines_--;
+            for(int x = 0; x < BOARD_WIDTH; x++)
+            {
+                board_[x][i] = false;
+            }
+            for(int k = i; k > 0; k--)
+            {
+                for(int x = 0; x < BOARD_WIDTH; x++)
+                {
+                    board_[x][k] = board_[x][k - 1];
+                }
+            }
+        }
     }
+}
+
+void Game::isCollision()
+{
+    for(int i = 0; i < cur->size(); i++)
+    {
+        for(int j = 0; j < cur->size(); j++)
+        {
+            if(cur->check(i, j)) board_[x_ + i - 1][y_ + j - 1] = true;
+        }
+    }
+    hold_cnt = 1;
+    setupNew();
+}
+
+void Game::whenLand()
+{
+    for(int i = 0; i < cur->size(); i++)
+    {
+        for(int j = 0; j < cur->size(); j++)
+        {
+            if(cur->check(i, j)) board_[x_ + i - 1][y_ + j - 1] = true;
+        }
+    }
+    hold_cnt = 1;
+    setupNew();
 }
 
 void Game::handleInput()
 {
+    bool canMove = true;
+    if(key(console::K_UP))
+    {
+        int drop_y = 0;
+        while(canMove)
+        {
+            for(int i = 0; i < cur->size(); i++)
+            {
+                for(int j = 0; j < cur->size(); j++)
+                {
+                    if(cur->check(i, j) && (y_ + j + drop_y >= BOARD_HEIGHT || board_[x_ + i - 1][y_ + j + drop_y]))
+                    {
+                        canMove = false;
+                        break;
+                    }
+                }
+            }
+            if(canMove) drop_y++;
+        }
+        y_ += drop_y;
+        whenLand();
+    }
+
     if (key(console::K_LEFT))
     {
         for(int i = 0; i < cur->size(); i++)
         {
-            if(!cur->check(x_, y_ + i) && x_ > 1)
+            for(int j = 0; j < cur->size(); j++)
             {
-                x_--;
-                break;
+                if(cur->check(i, j))
+                {
+                    if(x_ + i <= 1 || board_[x_ + i - 2][y_ + j - 1])
+                    {
+                        canMove = false;
+                        break;
+                    }
+                    else if(board_[x_ + i - 1][y_ + j])
+                    {
+                        isCollision();
+                    }
+                }
             }
         }
+        if(canMove) x_--;
     }
+
     if (key(console::K_RIGHT))
     {
         for(int i = 0; i < cur->size(); i++)
         {
-            if(!cur->check(x_ + cur->size() - 1, y_ + i) && x_ + cur->size() - 1 < BOARD_WIDTH)
+            for(int j = 0; j < cur->size(); j++)
             {
-                x_++;
-                break;
+                if(cur->check(i, j))
+                {
+                    if(x_ + i >= BOARD_WIDTH || board_[x_ + i][y_ + j - 1])
+                    {
+                        canMove = false;
+                        break;
+                    }
+                    else if(board_[x_ + i - 1][y_ + j])
+                    {
+                        isCollision();
+                    }
+                }
             }
         }
+        if(canMove) x_++;
     }
-    if (key(console::K_DOWN)) y_++;
+    
+    if (key(console::K_DOWN))
+    {
+        for(int i = 0; i < cur->size(); i++)
+        {
+            for(int j = 0; j < cur->size(); j++)
+            {
+                if(cur->check(i, j))
+                {
+                    if(y_ + j >= BOARD_HEIGHT || board_[x_ + i - 1][y_ + j])
+                    {
+                        canMove = false;
+                        whenLand();
+                        break;
+                    }
+                    else if(board_[x_ + i - 1][y_ + j])
+                    {
+                        isCollision();
+                    }
+                }
+            }
+        }
+        if(canMove) y_++;
+    }
     if (key(console::K_X))
     {
-        Tetromino* newCur = new Tetromino(cur->rotatedCW());
-        delete cur;
-        cur = newCur;
+        Tetromino newCur = cur->rotatedCW();
+        bool canRotate = true;
+        for(int i = 0; i < cur->size(); i++)
+        {
+            for(int j = 0; j < cur->size(); j++)
+            {
+                if(cur->check(i, j) && x_ + i >= BOARD_WIDTH)
+                {
+                    x_ = BOARD_WIDTH - cur->size() + 1;
+                }
+                else if(cur->check(i, j) && x_ + i <= 1) x_ = 1;
+                else if(y_ + j >= BOARD_HEIGHT) y_ = BOARD_HEIGHT - cur->size();
+                if(newCur.check(i, j) && board_[x_ + i - 1][y_ + j])
+                {
+                    canRotate = false;
+                }
+            }
+        }
+        if(canRotate) *cur = newCur;
     }
     if (key(console::K_Z))
     {
-        Tetromino* newCur = new Tetromino(cur->rotatedCCW());
-        delete cur;
-        cur = newCur;
+        Tetromino newCur = cur->rotatedCCW();
+        bool canRotate = true;
+        for(int i = 0; i < cur->size(); i++)
+        {
+            for(int j = 0; j < cur->size(); j++)
+            {
+                if(cur->check(i, j) && x_ + i >= BOARD_WIDTH)
+                {
+                    x_ = BOARD_WIDTH - cur->size() + 1;
+                }
+                else if(cur->check(i, j) && x_ + i <= 1) x_ = 1;
+                else if(y_ + j >= BOARD_HEIGHT) y_ = BOARD_HEIGHT - cur->size();
+                if(newCur.check(i, j) && board_[x_ + i - 1][y_ + j])
+                {
+                    canRotate = false;
+                }
+            }
+        }
+        if(canRotate) *cur = newCur;
+    }
+
+    if(key(console::K_SPACE))
+    {
+        hold_cnt--;
+        if(hold_cnt == 0)
+        {
+            if(hold == nullptr)
+            {
+                hold = cur->original();
+                setupNew();
+            }
+            else
+            {
+                Tetromino* temp = cur->original();
+                cur = new Tetromino(*hold);
+                delete hold;
+                hold = temp;
+                x_ = 5;
+                y_ = 1;
+            }
+        }
     }
 }
 
@@ -92,40 +279,112 @@ Tetromino* Game::randomTetromino()
     shape[6] = &Tetromino::L;
     srand(time(NULL));
 
-    return shape[rand() % 7];
+    return new Tetromino(*shape[rand() % 7]);
 }
 
 std::string Game::stringTime(clock_t start)
 {
     std::string time_string;
     clock_t end = clock();
-    double secs = double(end - start) / CLOCKS_PER_SEC;
+    double total_millisecs = double(end - start) * 1000.0 / CLOCKS_PER_SEC;
 
-    int hour = int(secs / 3600);
-    secs -= hour * 3600;
-    int min = int(secs / 60);
-    secs -= min * 60;
-    int sec = int(secs);
+    int min = int(total_millisecs / 60000);
+    total_millisecs -= min * 60000;
+    int sec = int(total_millisecs / 1000);
+    total_millisecs -= sec * 1000;
+    int millisec = int(total_millisecs) / 10; // 밀리세컨드를 두 자릿수로 제한
 
-    std::string str_hour = std::to_string(hour);
-    std::string str_min = std::to_string(min);
-    std::string str_sec = std::to_string(sec);
+    std::string str_min = (min < 10) ? "0" + std::to_string(min) : std::to_string(min);
+    std::string str_sec = (sec < 10) ? "0" + std::to_string(sec) : std::to_string(sec);
+    std::string str_millisec = (millisec < 10) ? "0" + std::to_string(millisec) : std::to_string(millisec);
 
-    if(sec < 10) str_sec = "0" + str_sec;
-    if(min < 10) str_min = "0" + str_min;
-    if(hour < 10) str_hour = "0" + str_hour;
-
-    time_string = str_hour + ":" + str_min + ":" + str_sec;
+    time_string = str_min + ":" + str_sec + ":" + str_millisec;
     return time_string;
 }
+
+
 
 // 게임 화면을 그린다.
 void Game::draw()
 {
+    int shadow_y = 0;
+    bool canMove = true;
+    while(canMove)
+    {
+        for(int i = 0; i < cur->size(); i++)
+        {
+            for(int j = 0; j < cur->size(); j++)
+            {
+                if(cur->check(i, j) && (y_ + j + shadow_y >= BOARD_HEIGHT || board_[x_ + i - 1][y_ + j + shadow_y]))
+                {
+                    canMove = false; 
+                    break;
+                }
+            }
+        }
+        if(canMove) shadow_y++; 
+    }
+
+    for(int i = 0; i < cur->size(); i++)
+    {
+        for(int j = 0; j < cur->size(); j++)
+        {
+            if(cur->check(i, j)) console::draw(i + x_, j + y_ + shadow_y, SHADOW_STRING);
+        }
+    }
+
     console::drawBox(0, 0, 11, 21);
     console::drawBox(12, 0, 17, 5);
     console::drawBox(18, 0, 23, 5);
     console::draw(13, 0, "Next");
+    int s_x, s_y;
+    if(next->size() == 2)
+    {
+        s_x = 14;
+        s_y = 2;
+    }
+    else if(next->size() == 3)
+    {
+        s_x = 13;
+        s_y = 2;
+    }
+    else
+    {
+        s_x = 13;
+        s_y = 1;
+    }
+    for(int i = 0; i < next->size(); i++)
+    {
+        for(int j = 0; j < next->size(); j++)
+        {
+            if(next->check(i, j)) console::draw(i + s_x, j + s_y, BLOCK_STRING);
+        }
+    }
+    if(hold != nullptr)
+    {
+        if(hold->size() == 2)
+        {
+            s_x = 20;
+            s_y = 2;
+        }
+        else if(hold->size() == 3)
+        {
+            s_x = 19;
+            s_y = 2;
+        }
+        else
+        {
+            s_x = 19;
+            s_y = 1;
+        }
+        for(int i = 0; i < hold->size(); i++)
+        {
+            for(int j = 0; j < hold->size(); j++)
+            {
+                if(hold->check(i, j)) console::draw(s_x + i, s_y + j, BLOCK_STRING);
+            }
+        }
+    }
     console::draw(19, 0, "Hold");
     console::draw(0, 22, std::to_string(inputLines_) + " lines left");
     console::draw(2, 23, stringTime(start_));
@@ -133,7 +392,7 @@ void Game::draw()
     {
         for(int j = 0; j < BOARD_HEIGHT; j++)
         {
-            if(board_[i][j]) console::draw(i, j, BLOCK_STRING);
+            if(board_[i][j]) console::draw(i + 1,  j + 1, BLOCK_STRING);
         }
     }
     cur->drawAt(cur->name(), x_, y_);
@@ -142,7 +401,16 @@ void Game::draw()
 // 게임 루프가 종료되어야 하는지 여부를 반환한다.
 bool Game::shouldExit()
 {
-
+    if(inputLines_ == 0)
+    {
+        console::draw(BOARD_WIDTH/2, BOARD_HEIGHT/2, "YOU WIN!");
+        return true;
+    }
+    if(isGameover)
+    {
+        console::draw(BOARD_WIDTH/2, BOARD_HEIGHT/2, "GAME OVER!");
+        return true;
+    }
 }
 
 Game::Game()
@@ -151,11 +419,14 @@ Game::Game()
     std::cin >> inputLines_;
     start_ = clock();
     next = randomTetromino();
-    cur = next;
+    cur = randomTetromino();
+    original_ = cur->original();
     hold = nullptr;
     x_ = 5;
     y_ = 1;
     timer = 0;
+    hold_cnt = 1;
+    isGameover = false;
     for(int i = 0; i < BOARD_WIDTH; i++)
         for(int j = 0; j < BOARD_HEIGHT; j++) board_[i][j] = false;
 }
