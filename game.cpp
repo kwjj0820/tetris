@@ -265,6 +265,8 @@ void Game::handleInput()
             }
         }
     }
+
+    if(key(console::K_ESC)) exit(0);
 }
 
 Tetromino* Game::randomTetromino()
@@ -396,19 +398,26 @@ void Game::draw()
         }
     }
     cur->drawAt(cur->name(), x_, y_);
+    if(inputLines_ <= 0)
+    {
+        console::draw(2, BOARD_HEIGHT/2 + 1, "YOU WIN!");
+        console::draw(2, BOARD_HEIGHT/2 + 2, stringTime(start_));
+    }
+    if(isGameover)
+    {
+        console::draw(1, BOARD_HEIGHT/2, "GAME OVER!");
+    }
 }
 
 // 게임 루프가 종료되어야 하는지 여부를 반환한다.
 bool Game::shouldExit()
 {
-    if(inputLines_ == 0)
+    if(inputLines_ <= 0)
     {
-        console::draw(BOARD_WIDTH/2, BOARD_HEIGHT/2, "YOU WIN!");
         return true;
     }
     if(isGameover)
     {
-        console::draw(BOARD_WIDTH/2, BOARD_HEIGHT/2, "GAME OVER!");
         return true;
     }
 }
